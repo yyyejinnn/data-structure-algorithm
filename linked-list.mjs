@@ -39,6 +39,21 @@ class LinkedList {
     console.log(text);
   }
 
+  getNodeAt(index) {
+    if (index > this.count || index < 0) {
+      throw new Error('범위를 넘어갔습니다.');
+    }
+
+    const currNode = this.head;
+
+    for (let i = 0; i < index; i++) {
+      currNode = currNode.next;
+    }
+    console.log(currNode);
+
+    return currNode;
+  }
+
   clear() {
     this.head = null;
     this.count = 0;
