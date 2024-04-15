@@ -71,6 +71,38 @@ class LinkedList {
   insertLast(data) {
     this.insertAt(this.count, data);
   }
+
+  deleteAt(index) {
+    if (index > this.count || index < 0) {
+      throw new Error('범위를 넘어갔습니다.');
+    }
+
+    if (index == 0) {
+      let deletedNode = this.head;
+
+      this.head = this.head.next;
+      this.count--;
+
+      return deletedNode;
+    } else {
+      let currNode = this.head;
+
+      for (let i = 0; i < index - 1; i++) {
+        currNode = currNode.next;
+      }
+
+      let deletedNode = currNode.next;
+
+      currNode.next = currNode.next.next;
+      this.count--;
+
+      return deletedNode;
+    }
+  }
+
+  deleteLast() {
+    return this.deleteAt(this.count - 1);
+  }
 }
 
 export { Node, LinkedList };
