@@ -61,13 +61,16 @@ class DoublyLinkedList {
 
     if (index == 0) {
       newNode.next = this.head;
+
+      if (this.head != null) {
+        this.head.prev = newNode;
+      }
+
       this.head = newNode;
-      this.tail = newNode;
-    } else if (index == this.count) {
+    } else if (index == this.count - 1) {
       // insertLast
       this.tail.next = newNode;
       newNode.prev = this.tail;
-      this.tail = newNode;
     } else {
       let currNode = this.head;
 
@@ -80,6 +83,10 @@ class DoublyLinkedList {
 
       currNode.next = newNode;
       newNode.next.prev = newNode;
+    }
+
+    if (newNode.next == null) {
+      this.tail = newNode;
     }
 
     this.count++;
@@ -99,9 +106,14 @@ class DoublyLinkedList {
     if (index == 0) {
       deletedNode = this.head;
 
-      this.head = this.head.next;
-      this.head.prev = null;
-    } else if (index == this.count) {
+      if (this.head.next == null) {
+        this.head = null;
+        this.tail = null;
+      } else {
+        this.head = this.head.next;
+        this.head.prev = null;
+      }
+    } else if (index == this.count - 1) {
       deletedNode = this.tail;
 
       this.tail = this.tail.prev;
