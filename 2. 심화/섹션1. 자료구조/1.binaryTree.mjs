@@ -96,6 +96,20 @@ export class BinaryTree {
     this.postOrderTraversal(tree.getRightSubTree());
     console.log(tree.data);
   }
+
+  removeLeftSubTree() {
+    const removed = this.getLeftSubTree();
+    this.setLeftSubTree(null);
+
+    return removed;
+  }
+
+  removRightSubTree() {
+    const removed = this.getRightSubTree();
+    this.setRightSubTree(null);
+
+    return removed;
+  }
 }
 
 /**

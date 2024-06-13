@@ -14,6 +14,10 @@
  * * 이진 탐색 트리
  * - 데이터 삽입, 제거, 검색이 빠름
  * - 메모리도 적게 요구함
+ *
+ * - 한쪽으로 치우신 트리일 경우 성능 저하 (연결리스트와 차이 없어짐)
+ * - 트리가 균형을 이루고있어야 함 (ex. 완전 이진 트리, 포화 이진 트리)
+ * -> AVL 트리, 레드-블랙 트리 (자가 균형 이진 탐색 트리)
  */
 
 /**
@@ -23,6 +27,7 @@
  * 추상 자료형
  * - insert(data)
  * - search(targetData)
+ * - remove(targetData)
  */
 
 import { BinaryTree } from './1.binaryTree.mjs';
@@ -80,6 +85,92 @@ class BinarySearchTree {
     }
 
     return null;
+  }
+
+  remove(targetData) {
+    // root는 부모 노드가 없기 때문에 임시로 지정해줌
+    let fakeParentRootNode = new BinaryTree(0);
+    fakeParentRootNode.setRightSubTree(this.root);
+
+    let parentNode = fakeParentRootNode;
+    let currNode = this.root;
+
+    /** 탐색 */
+    while (currNode && currNode.getData() != targetData) {
+      parentNode = currNode;
+
+      if (targetData < currNode.getData()) {
+        currNode = currNode.getLeftSubTree();
+      } else {
+        currNode = currNode.getRightSubTree();
+      }
+    }
+
+    /** 제거 */
+    if (!currNode) {
+      return;
+    }
+
+    let deletingNode = currNode; // return 용
+
+    // 1. 자식노드가 하나도 없는 경우
+    if (!(currNode.getLeftSubTree() && currNode.getRightSubTree())) {
+      if (parentNode.getLeftSubTree() == deletingNode) {
+        parentNode.removeLeftSubTree();
+      } else {
+        parentNode.removRightSubTree();
+      }
+    }
+
+    // 2. 자식노드가 하나일 경우
+    else if (!currNode.getLeftSubTree() || !currNode.getRightSubTree()) {
+      let deletingChildNode;
+
+      if (deletingNode.getLeftSubTree() != null) {
+        deletingChildNode = deletingNode.getLeftSubTree();
+      } else {
+        deletingChildNode = deletingNode.getRightSubTree();
+      }
+
+      if (parentNode.getLeftSubTree() == deletingNode) {
+        parentNode.setLeftSubTree(deletingChildNode);
+      } else {
+        parentNode.setRightSubTree(deletingChildNode);
+      }
+    }
+
+    // 3. 자식노드가 두개일 경우
+    else {
+      let replacingNode = deletingNode.getLeftSubTree();
+      let replacingParent = deletingNode;
+
+      // 가장 큰 값 탐색
+      while (replacingNode.getRightSubTree() != null) {
+        replacingParent = replacingNode;
+        replacingNode = replacingNode.getRightSubTree();
+      }
+
+      let deletingNodeData = deletingNode.getData();
+
+      deletingNode.setData(replacingNode.getData());
+
+      if (replacingParent.getLeftSubTree() == replacingNode) {
+        replacingParent.setLeftSubTree(replacingNode.getLeftSubTree());
+      } else {
+        replacingParent.setRightSubTree(replacingNode.getLeftSubTree());
+      }
+
+      // 반환 값 위한 과정
+      deletingNode = replacingNode;
+      deletingNode.setData(deletingNodeData);
+    }
+
+    // 루트 노드가 변경됐을 경우
+    if (fakeParentRootNode.getRightSubTree() != this.root) {
+      this.root = fakeParentRootNode.getRightSubTree();
+    }
+
+    return deletingNode;
   }
 }
 
