@@ -36,7 +36,7 @@
  * - postOrderTraversal(): 후위순회
  */
 
-class BinaryTree {
+export class BinaryTree {
   constructor(data, leftSubTree = null, rightSubTree = null) {
     this.data = data;
     this.leftSubTree = leftSubTree;
@@ -119,6 +119,6 @@ tree3.setRightSubTree(tree7);
 // console.log(tree1.getLeftSubTree().getData());
 // console.log(tree1.getRightSubTree().getData());
 
-console.log(tree1.preOrderTraversal(tree1));
-console.log(tree1.inOrderTraversal(tree1));
-console.log(tree1.postOrderTraversal(tree1));
+// console.log(tree1.preOrderTraversal(tree1));
+// console.log(tree1.inOrderTraversal(tree1));
+// console.log(tree1.postOrderTraversal(tree1));
