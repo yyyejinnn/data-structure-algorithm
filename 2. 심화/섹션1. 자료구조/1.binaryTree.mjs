@@ -104,7 +104,7 @@ export class BinaryTree {
     return removed;
   }
 
-  removRightSubTree() {
+  removeRightSubTree() {
     const removed = this.getRightSubTree();
     this.setRightSubTree(null);
 

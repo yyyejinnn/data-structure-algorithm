@@ -118,7 +118,7 @@ class BinarySearchTree {
       if (parentNode.getLeftSubTree() == deletingNode) {
         parentNode.removeLeftSubTree();
       } else {
-        parentNode.removRightSubTree();
+        parentNode.removeRightSubTree();
       }
     }
 

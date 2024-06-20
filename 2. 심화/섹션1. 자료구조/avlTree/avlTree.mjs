@@ -34,6 +34,8 @@
  * - removeHelper()
  */
 
+import { BinaryTree } from './binaryTree.mjs';
+
 export class AVLTree {
   constructor(rootNode = null) {
     this.root = rootNode;
@@ -77,7 +79,7 @@ export class AVLTree {
 
     let childNode = node.getRightSubTree(); // 3
     node.setRightSubTree(childNode.getLeftSubTree()); // 만약 3노드에 왼쪽 자식도 존재하는 경우 -> 1의 오른쪽 노드에 연결
-    childNode.setLeftSubTree(childNode);
+    childNode.setLeftSubTree(node);
 
     // 높이 계산
     this.updateHeight(node);
@@ -110,12 +112,12 @@ export class AVLTree {
       targetNode = this.rotateRight(targetNode);
     }
     // LR: <모양
-    else if (balancFactor > 1 && data > targetNode.getRightSubTree().getData()) {
+    else if (balancFactor > 1 && data > targetNode.getLeftSubTree().getData()) {
       targetNode.setLeftSubTree(this.rotateLeft(targetNode.getLeftSubTree())); // LR -> /
       targetNode = this.rotateRight(targetNode);
     }
     // RL: >모양
-    else if (balancFactor < -1 && data < targetNode.getLeftSubTree().getData()) {
+    else if (balancFactor < -1 && data < targetNode.getRightSubTree().getData()) {
       targetNode.setRightSubTree(this.rotateRight(targetNode.getRightSubTree())); // RR -> \
       targetNode = this.rotateLeft(targetNode);
     }
@@ -146,4 +148,134 @@ export class AVLTree {
 
     return unBalanceNode;
   }
+
+  // 대충 상향식으로 하면 복잡하기 때문에 하향식(재귀)으로 접근하자..
+  insert(targetRootNode, data) {
+    if (targetRootNode == null) {
+      targetRootNode = new BinaryTree(data);
+    }
+
+    if (this.root == null) {
+      this.root = targetRootNode;
+    } else if (targetRootNode.getData() == data) {
+      return targetRootNode; // 중복 X
+    } else if (targetRootNode.getData() > data) {
+      targetRootNode.setLeftSubTree(this.insert(targetRootNode.getLeftSubTree(), data));
+    } else if (targetRootNode.getData() < data) {
+      targetRootNode.setRightSubTree(this.insert(targetRootNode.getRightSubTree(), data));
+    }
+
+    this.updateHeight(targetRootNode); // 하향식 접근 -> 가장 아래 노드부터 업데이트 됨
+    targetRootNode = this.rotation(targetRootNode, data);
+
+    return targetRootNode;
+  }
+
+  remove(targetRootNode, data, parentNode = null) {
+    if (targetRootNode.getData() > data && targetRootNode.getLeftSubTree()) {
+      targetRootNode.setLeftSubTree(this.remove(targetRootNode.getLeftSubTree(), data, targetRootNode)); // 제거하면 제거된 노드를 대체하는 자식 노드가 리턴 됨!
+    } else if (targetRootNode.getData() < data && targetRootNode.getRightSubTree()) {
+      targetRootNode.setRightSubTree(this.remove(targetRootNode.getRightSubTree(), data, targetRootNode));
+    } else if (targetRootNode.getData() == data) {
+      targetRootNode = this.removeHelper(targetRootNode, parentNode); // 제거 완
+
+      if (!parentNode && !targetRootNode) {
+        // 루트노드가 제거될 경우
+        this.updateHeight(targetRootNode);
+        let unBalanceNode = this.getUnBalanceNode(targetRootNode);
+        targetRootNode = this.rotation(targetRootNode, unBalanceNode.getData());
+      }
+
+      return targetRootNode; // 기저조건
+    }
+
+    this.updateHeight(targetRootNode);
+
+    // insert와 다른 점은 균형을 무너뜨리는 노드를 찾는 과정 필요
+    // insert는 삽입 데이터가 균형을 무너뜨리는 노드가 됨
+    let unBalanceNode = this.getUnBalanceNode(targetRootNode);
+    targetRootNode = this.rotation(targetRootNode, unBalanceNode.getData());
+
+    return targetRootNode;
+  }
+
+  // binarySearchTree의 remove와 비슷
+  // remove는 삭제한 노드를 반환 했지만, alvTree에서는 삭제할 노드를 대체하는 노드(자식 노드)를 반환
+  removeHelper(deletingNode, parentNode) {
+    let fakeParentRootNode = new BinaryTree(0);
+    fakeParentRootNode.setRightSubTree(this.root);
+
+    if (parentNode == null) {
+      parentNode = fakeParentRootNode;
+    }
+
+    let deletingNodeChild;
+
+    if (!deletingNode.getLeftSubTree() && !deletingNode.getRightSubTree()) {
+      // 터미널 노드
+      if (parentNode.getLeftSubTree() == deletingNode) {
+        parentNode.removeLeftSubTree();
+      } else {
+        parentNode.removeRightSubTree();
+      }
+    } else if (!deletingNode.getLeftSubTree() || !deletingNode.getRightSubTree()) {
+      if (deletingNode.getLeftSubTree()) {
+        deletingNodeChild = deletingNode.getLeftSubTree();
+      } else {
+        deletingNodeChild = deletingNode.getRightSubTree();
+      }
+
+      if (parentNode.getLeftSubTree() == deletingNode) {
+        parentNode.setLeftSubTree(deletingNodeChild);
+      } else {
+        parentNode.setRightSubTree(deletingNodeChild);
+      }
+    } else {
+      let replacingNode = deletingNode.getLeftSubTree();
+      let replacingNodeParent = deletingNode;
+
+      while (replacingNode.getRightSubTree() != null) {
+        replacingNodeParent = replacingNode;
+        replacingNode = replacingNode.getRightSubTree();
+      }
+
+      deletingNode.setData(replacingNode.getData());
+
+      if (replacingNodeParent.getLeftSubTree() == replacingNode) {
+        replacingNodeParent.setLeftSubTree(replacingNode.getLeftSubTree());
+      } else {
+        replacingNodeParent.setRightSubTree(replacingNode.getLeftSubTree());
+      }
+
+      deletingNodeChild = deletingNode;
+
+      if (fakeParentRootNode.getRightSubTree() != this.root) {
+        this.root = fakeParentRootNode.getRightSubTree();
+      }
+
+      return deletingNodeChild;
+    }
+  }
 }
+
+let avlTree = new AVLTree();
+console.log('========== insert ==========');
+avlTree.insert(avlTree.root, 1);
+avlTree.insert(avlTree.root, 2);
+avlTree.insert(avlTree.root, 3);
+avlTree.insert(avlTree.root, 4);
+avlTree.insert(avlTree.root, 5);
+avlTree.insert(avlTree.root, 6);
+avlTree.insert(avlTree.root, 7);
+console.log(avlTree.root);
+avlTree.root.inOrderTraversal(avlTree.root);
+
+console.log('========== remove ==========');
+avlTree.remove(avlTree.root, 2);
+avlTree.remove(avlTree.root, 3);
+avlTree.remove(avlTree.root, 1);
+console.log(avlTree.root);
+avlTree.root.inOrderTraversal(avlTree.root);
+
+console.log('========== search ==========');
+console.log(avlTree.search(7));
