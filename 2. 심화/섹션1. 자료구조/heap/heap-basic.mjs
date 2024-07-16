@@ -1,7 +1,7 @@
 import { BinaryTree } from './binaryTree.mjs';
 
 // 최소 힙 구현
-class Heap {
+export class HeapBasic {
   constructor() {
     this.root = null;
     this.lastInsertedNode = null;
@@ -32,14 +32,11 @@ class Heap {
     this.lastInsertedNode = newNode;
 
     /** 2. 우선 순위에 맞게 정렬 */
-
     while (newNode.parent != null) {
-      const newNodeData = newNode.getData();
-      const parentData = newNode.parent.getData();
-
-      if (this.isBigPriority(newNodeData, parentData)) {
-        newNode.parent.setData(newNodeData);
-        newNode.setData(parentData);
+      if (this.isBigPriority(newNode.getData(), newNode.parent.getData())) {
+        let temp = newNode.getData();
+        newNode.setData(newNode.parent.getData());
+        newNode.parent.setData(temp);
 
         newNode = newNode.parent; //  한 단계 위로
       } else {
@@ -174,7 +171,7 @@ class Heap {
 
         current = higherChild;
       }
-    } while (current.getLeftSubTree() == null || current.getRightSubTree() == null);
+    } while (current.getLeftSubTree() != null || current.getRightSubTree() != null);
 
     return deletedNode;
   }
@@ -207,7 +204,7 @@ class Heap {
       let current = this.lastInsertedNode;
       let firstLeftSibling = null;
 
-      while (current.getData().parent != null) {
+      while (current.parent.parent != null) {
         current = current.parent;
         firstLeftSibling = this.getLeftSibling(current);
         if (firstLeftSibling != null) {
@@ -246,18 +243,18 @@ class Heap {
  * test
  */
 
-let heap = new Heap();
-heap.insert(4);
-heap.insert(2);
-heap.insert(5);
-heap.insert(7);
-heap.insert(1);
+// let heap = new HeapBasic();
+// heap.insert(4);
+// heap.insert(2);
+// heap.insert(5);
+// heap.insert(7);
+// heap.insert(1);
 
-console.log('================');
-heap.root.inOrderTraversal(heap.root);
+// console.log('================');
+// heap.root.inOrderTraversal(heap.root);
 
-console.log('=======root======');
-console.log(heap.root.getData());
+// console.log('=======root======');
+// console.log(heap.root.getData());
 
-console.log('=======remove======');
-console.log(heap.remove()); // 1
+// console.log('=======remove======');
+// console.log(heap.remove()); // 1
