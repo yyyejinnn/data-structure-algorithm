@@ -8,7 +8,7 @@
  * isEmpty
  */
 
-import { DoublyLinkedList } from './doubly-linked-list.mjs';
+import { DoublyLinkedList } from './4.doubly-linked-list.mjs';
 
 class Queue {
   constructor() {
